@@ -345,344 +345,317 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
                 @Test(expectedExceptions = NullPointerException.class)
                 public void test_factory_from_BigMoneyProvider_RoundingMode_nullRoundingMode() {
             Money.of(BigMoney.parse("GBP 104.235"), (RoundingMode) null);
-                }
+                }*/
 
-                //-----------------------------------------------------------------------
-                // total(Money...)
-                //-----------------------------------------------------------------------
-                public void test_factory_total_varargs_1() {
-            Money test = Money.total(GBP_1_23);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 123);
-                }
 
-                public void test_factory_total_array_1() {
-            Money[] array = new Money[] {GBP_1_23};
-                    Money test = Money.total(array);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 123);
-                }
+    /*
+     * total()
+     */
+    public function test_factory_total_varargs_1()
+    {
+        $test = Money::total(self::$GBP_1_23);
+        $this->assertEquals($test->getCurrency(), self::$GBP);
+        $this->assertEquals($test->getAmountMinorInt(), 123);
+    }
 
-                public void test_factory_total_varargs_3() {
-            Money test = Money.total(GBP_1_23, GBP_2_33, GBP_2_36);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 592);
-                }
+    public function test_factory_total_array_1()
+    {
+        $test = Money::total(...[self::$GBP_1_23]);
+        $this->assertEquals($test->getCurrency(), self::$GBP);
+        $this->assertEquals($test->getAmountMinorInt(), 123);
+    }
 
-                public void test_factory_total_array_3() {
-            Money[] array = new Money[] {GBP_1_23, GBP_2_33, GBP_2_36};
-                    Money test = Money.total(array);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 592);
-                }
+    public function test_factory_total_varargs_3()
+    {
+        $test = Money::total(self::$GBP_1_23, self::$GBP_2_33, self::$GBP_2_36);
+        $this->assertEquals($test->getCurrency(), self::$GBP);
+        $this->assertEquals($test->getAmountMinorInt(), 592);
+    }
 
-                @Test(expectedExceptions = IllegalArgumentException.class)
-                public void test_factory_total_varargs_empty() {
-            Money.total();
-                }
+    public function test_factory_total_array_3()
+    {
+        $test = Money::total(...[self::$GBP_1_23, self::$GBP_2_33, self::$GBP_2_36]);
+        $this->assertEquals($test->getCurrency(), self::$GBP);
+        $this->assertEquals($test->getAmountMinorInt(), 592);
+    }
 
-                @Test(expectedExceptions = IllegalArgumentException.class)
-                public void test_factory_total_array_empty() {
-            Money[] array = new Money[0];
-                    Money.total(array);
-                }
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function test_factory_total_varargs_empty()
+    {
+        Money::total();
+    }
 
-                @Test(expectedExceptions = CurrencyMismatchException.class)
-                public void test_factory_total_varargs_currenciesDiffer() {
-                    try {
-                        Money.total(GBP_2_33, JPY_423);
-                    } catch (CurrencyMismatchException ex) {
-                assertEquals(ex.getFirstCurrency(), GBP);
-                assertEquals(ex.getSecondCurrency(), JPY);
-                throw ex;
-            }
-                }
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function test_factory_total_array_empty()
+    {
+        Money::total(...[]);
+    }
 
-                @Test(expectedExceptions = CurrencyMismatchException.class)
-                public void test_factory_total_array_currenciesDiffer() {
-                    try {
-                        Money[] array = new Money[] {GBP_2_33, JPY_423};
-                        Money.total(array);
-                    } catch (CurrencyMismatchException ex) {
-                assertEquals(ex.getFirstCurrency(), GBP);
-                assertEquals(ex.getSecondCurrency(), JPY);
-                throw ex;
-            }
-                }
+    /**
+     * @expectedException \SmartGecko\Money\CurrencyMismatchException
+     */
+    public function test_factory_total_varargs_currenciesDiffer()
+    {
+        try {
+            Money::total(self::$GBP_2_33, self::$JPY_423);
+        } catch (CurrencyMismatchException $e) {
+            $this->assertEquals($e->getFirstCurrency(), self::$GBP);
+            $this->assertEquals($e->getSecondCurrency(), self::$JPY);
+            throw $e;
+        }
+    }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_varargs_nullFirst() {
-            Money.total((Money) null, GBP_2_33, GBP_2_36);
-                }
+    /**
+     * @expectedException \SmartGecko\Money\CurrencyMismatchException
+     */
+    public function test_factory_total_array_currenciesDiffer()
+    {
+        try {
+            Money::total(...[self::$GBP_2_33, self::$JPY_423]);
+        } catch (CurrencyMismatchException $e) {
+            $this->assertEquals($e->getFirstCurrency(), self::$GBP);
+            $this->assertEquals($e->getSecondCurrency(), self::$JPY);
+            throw $e;
+        }
+    }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_array_nullFirst() {
-            Money[] array = new Money[] {null, GBP_2_33, GBP_2_36};
-                    Money.total(array);
-                }
+    /*
+       //-----------------------------------------------------------------------
+       // total(CurrencyUnit,Money...)
+       //-----------------------------------------------------------------------
+       public void test_factory_total_CurrencyUnitVarargs_1() {
+   Money test = Money.total(GBP, GBP_1_23);
+           assertEquals(test.getCurrencyUnit(), GBP);
+           assertEquals(test.getAmountMinorInt(), 123);
+       }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_varargs_nullNotFirst() {
-            Money.total(GBP_2_33, null, GBP_2_36);
-                }
+       public void test_factory_total_CurrencyUnitArray_1() {
+   Money[] array = new Money[] {GBP_1_23};
+           Money test = Money.total(GBP, array);
+           assertEquals(test.getCurrencyUnit(), GBP);
+           assertEquals(test.getAmountMinorInt(), 123);
+       }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_array_nullNotFirst() {
-            Money[] array = new Money[] {GBP_2_33, null, GBP_2_36};
-                    Money.total(array);
-                }
+       public void test_factory_total_CurrencyUnitVarargs_3() {
+   Money test = Money.total(GBP, GBP_1_23, GBP_2_33, GBP_2_36);
+           assertEquals(test.getCurrencyUnit(), GBP);
+           assertEquals(test.getAmountMinorInt(), 592);
+       }
 
-                //-----------------------------------------------------------------------
-                // total(Iterable)
-                //-----------------------------------------------------------------------
-                public void test_factory_total_Iterable() {
-            Iterable<Money> iterable = Arrays.asList(GBP_1_23, GBP_2_33, GBP_2_36);
-                    Money test = Money.total(iterable);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 592);
-                }
+       public void test_factory_total_CurrencyUnitArray_3() {
+   Money[] array = new Money[] {GBP_1_23, GBP_2_33, GBP_2_36};
+           Money test = Money.total(GBP, array);
+           assertEquals(test.getCurrencyUnit(), GBP);
+           assertEquals(test.getAmountMinorInt(), 592);
+       }
 
-                @Test(expectedExceptions = IllegalArgumentException.class)
-                public void test_factory_total_Iterable_empty() {
-            Iterable<Money> iterable = Collections.emptyList();
-                    Money.total(iterable);
-                }
+       public void test_factory_total_CurrencyUnitVarargs_empty() {
+   Money test = Money.total(GBP);
+           assertEquals(test.getCurrencyUnit(), GBP);
+           assertEquals(test.getAmountMinorInt(), 0);
+       }
 
-                @Test(expectedExceptions = CurrencyMismatchException.class)
-                public void test_factory_total_Iterable_currenciesDiffer() {
-                    try {
-                        Iterable<Money> iterable = Arrays.asList(GBP_2_33, JPY_423);
-                        Money.total(iterable);
-                    } catch (CurrencyMismatchException ex) {
-                assertEquals(ex.getFirstCurrency(), GBP);
-                assertEquals(ex.getSecondCurrency(), JPY);
-                throw ex;
-            }
-                }
+       public void test_factory_total_CurrencyUnitArray_empty() {
+   Money[] array = new Money[0];
+           Money test = Money.total(GBP, array);
+           assertEquals(test.getCurrencyUnit(), GBP);
+           assertEquals(test.getAmountMinorInt(), 0);
+       }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_Iterable_nullFirst() {
-            Iterable<Money> iterable = Arrays.asList(null, GBP_2_33, GBP_2_36);
-                    Money.total(iterable);
-                }
+       @Test(expectedExceptions = CurrencyMismatchException.class)
+       public void test_factory_total_CurrencyUnitVarargs_currenciesDiffer() {
+           try {
+               Money.total(GBP, JPY_423);
+           } catch (CurrencyMismatchException ex) {
+       assertEquals(ex.getFirstCurrency(), GBP);
+       assertEquals(ex.getSecondCurrency(), JPY);
+       throw ex;
+   }
+       }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_Iterable_nullNotFirst() {
-            Iterable<Money> iterable = Arrays.asList(GBP_2_33, null, GBP_2_36);
-                    Money.total(iterable);
-                }
+       @Test(expectedExceptions = CurrencyMismatchException.class)
+       public void test_factory_total_CurrencyUnitArray_currenciesDiffer() {
+           try {
+               Money[] array = new Money[] {JPY_423};
+               Money.total(GBP, array);
+           } catch (CurrencyMismatchException ex) {
+       assertEquals(ex.getFirstCurrency(), GBP);
+       assertEquals(ex.getSecondCurrency(), JPY);
+       throw ex;
+   }
+       }
 
-                //-----------------------------------------------------------------------
-                // total(CurrencyUnit,Money...)
-                //-----------------------------------------------------------------------
-                public void test_factory_total_CurrencyUnitVarargs_1() {
-            Money test = Money.total(GBP, GBP_1_23);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 123);
-                }
+       @Test(expectedExceptions = CurrencyMismatchException.class)
+       public void test_factory_total_CurrencyUnitVarargs_currenciesDifferInArray() {
+           try {
+               Money.total(GBP, GBP_2_33, JPY_423);
+           } catch (CurrencyMismatchException ex) {
+       assertEquals(ex.getFirstCurrency(), GBP);
+       assertEquals(ex.getSecondCurrency(), JPY);
+       throw ex;
+   }
+       }
 
-                public void test_factory_total_CurrencyUnitArray_1() {
-            Money[] array = new Money[] {GBP_1_23};
-                    Money test = Money.total(GBP, array);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 123);
-                }
+       @Test(expectedExceptions = CurrencyMismatchException.class)
+       public void test_factory_total_CurrencyUnitArray_currenciesDifferInArray() {
+           try {
+               Money[] array = new Money[] {GBP_2_33, JPY_423};
+               Money.total(GBP, array);
+           } catch (CurrencyMismatchException ex) {
+       assertEquals(ex.getFirstCurrency(), GBP);
+       assertEquals(ex.getSecondCurrency(), JPY);
+       throw ex;
+   }
+       }
 
-                public void test_factory_total_CurrencyUnitVarargs_3() {
-            Money test = Money.total(GBP, GBP_1_23, GBP_2_33, GBP_2_36);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 592);
-                }
+       @Test(expectedExceptions = NullPointerException.class)
+       public void test_factory_total_CurrencyUnitVarargs_nullFirst() {
+   Money.total(GBP, null, GBP_2_33, GBP_2_36);
+       }
 
-                public void test_factory_total_CurrencyUnitArray_3() {
-            Money[] array = new Money[] {GBP_1_23, GBP_2_33, GBP_2_36};
-                    Money test = Money.total(GBP, array);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 592);
-                }
+       @Test(expectedExceptions = NullPointerException.class)
+       public void test_factory_total_CurrencyUnitArray_nullFirst() {
+   Money[] array = new Money[] {null, GBP_2_33, GBP_2_36};
+           Money.total(GBP, array);
+       }
 
-                public void test_factory_total_CurrencyUnitVarargs_empty() {
-            Money test = Money.total(GBP);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 0);
-                }
+       @Test(expectedExceptions = NullPointerException.class)
+       public void test_factory_total_CurrencyUnitVarargs_nullNotFirst() {
+   Money.total(GBP, GBP_2_33, null, GBP_2_36);
+       }
 
-                public void test_factory_total_CurrencyUnitArray_empty() {
-            Money[] array = new Money[0];
-                    Money test = Money.total(GBP, array);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 0);
-                }
+       @Test(expectedExceptions = NullPointerException.class)
+       public void test_factory_total_CurrencyUnitArray_nullNotFirst() {
+   Money[] array = new Money[] {GBP_2_33, null, GBP_2_36};
+           Money.total(GBP, array);
+       }
 
-                @Test(expectedExceptions = CurrencyMismatchException.class)
-                public void test_factory_total_CurrencyUnitVarargs_currenciesDiffer() {
-                    try {
-                        Money.total(GBP, JPY_423);
-                    } catch (CurrencyMismatchException ex) {
-                assertEquals(ex.getFirstCurrency(), GBP);
-                assertEquals(ex.getSecondCurrency(), JPY);
-                throw ex;
-            }
-                }
+       //-----------------------------------------------------------------------
+       // total(CurrencyUnit,Iterable)
+       //-----------------------------------------------------------------------
+       public void test_factory_total_CurrencyUnitIterable() {
+   Iterable<Money> iterable = Arrays.asList(GBP_1_23, GBP_2_33, GBP_2_36);
+           Money test = Money.total(GBP, iterable);
+           assertEquals(test.getCurrencyUnit(), GBP);
+           assertEquals(test.getAmountMinorInt(), 592);
+       }
 
-                @Test(expectedExceptions = CurrencyMismatchException.class)
-                public void test_factory_total_CurrencyUnitArray_currenciesDiffer() {
-                    try {
-                        Money[] array = new Money[] {JPY_423};
-                        Money.total(GBP, array);
-                    } catch (CurrencyMismatchException ex) {
-                assertEquals(ex.getFirstCurrency(), GBP);
-                assertEquals(ex.getSecondCurrency(), JPY);
-                throw ex;
-            }
-                }
+       public void test_factory_total_CurrencyUnitIterable_empty() {
+   Iterable<Money> iterable = Collections.emptyList();
+           Money test = Money.total(GBP, iterable);
+           assertEquals(test.getCurrencyUnit(), GBP);
+           assertEquals(test.getAmountMinorInt(), 0);
+       }
 
-                @Test(expectedExceptions = CurrencyMismatchException.class)
-                public void test_factory_total_CurrencyUnitVarargs_currenciesDifferInArray() {
-                    try {
-                        Money.total(GBP, GBP_2_33, JPY_423);
-                    } catch (CurrencyMismatchException ex) {
-                assertEquals(ex.getFirstCurrency(), GBP);
-                assertEquals(ex.getSecondCurrency(), JPY);
-                throw ex;
-            }
-                }
+       @Test(expectedExceptions = CurrencyMismatchException.class)
+       public void test_factory_total_CurrencyUnitIterable_currenciesDiffer() {
+           try {
+               Iterable<Money> iterable = Arrays.asList(JPY_423);
+               Money.total(GBP, iterable);
+           } catch (CurrencyMismatchException ex) {
+       assertEquals(ex.getFirstCurrency(), GBP);
+       assertEquals(ex.getSecondCurrency(), JPY);
+       throw ex;
+   }
+       }
 
-                @Test(expectedExceptions = CurrencyMismatchException.class)
-                public void test_factory_total_CurrencyUnitArray_currenciesDifferInArray() {
-                    try {
-                        Money[] array = new Money[] {GBP_2_33, JPY_423};
-                        Money.total(GBP, array);
-                    } catch (CurrencyMismatchException ex) {
-                assertEquals(ex.getFirstCurrency(), GBP);
-                assertEquals(ex.getSecondCurrency(), JPY);
-                throw ex;
-            }
-                }
+       @Test(expectedExceptions = CurrencyMismatchException.class)
+       public void test_factory_total_CurrencyUnitIterable_currenciesDifferInIterable() {
+           try {
+               Iterable<Money> iterable = Arrays.asList(GBP_2_33, JPY_423);
+               Money.total(GBP, iterable);
+           } catch (CurrencyMismatchException ex) {
+       assertEquals(ex.getFirstCurrency(), GBP);
+       assertEquals(ex.getSecondCurrency(), JPY);
+       throw ex;
+   }
+       }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_CurrencyUnitVarargs_nullFirst() {
-            Money.total(GBP, null, GBP_2_33, GBP_2_36);
-                }
+       @Test(expectedExceptions = NullPointerException.class)
+       public void test_factory_total_CurrencyUnitIterable_nullFirst() {
+   Iterable<Money> iterable = Arrays.asList(null, GBP_2_33, GBP_2_36);
+           Money.total(GBP, iterable);
+       }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_CurrencyUnitArray_nullFirst() {
-            Money[] array = new Money[] {null, GBP_2_33, GBP_2_36};
-                    Money.total(GBP, array);
-                }
+       @Test(expectedExceptions = NullPointerException.class)
+       public void test_factory_total_CurrencyUnitIterable_nullNotFirst() {
+   Iterable<Money> iterable = Arrays.asList(GBP_2_33, null, GBP_2_36);
+           Money.total(GBP, iterable);
+       }
+*/
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_CurrencyUnitVarargs_nullNotFirst() {
-            Money.total(GBP, GBP_2_33, null, GBP_2_36);
-                }
+    /*
+     * parse()
+     */
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_CurrencyUnitArray_nullNotFirst() {
-            Money[] array = new Money[] {GBP_2_33, null, GBP_2_36};
-                    Money.total(GBP, array);
-                }
+    public function parseProvider()
+    {
+        (new CsvCurrencyDataProvider())->registerCurrencies();
 
-                //-----------------------------------------------------------------------
-                // total(CurrencyUnit,Iterable)
-                //-----------------------------------------------------------------------
-                public void test_factory_total_CurrencyUnitIterable() {
-            Iterable<Money> iterable = Arrays.asList(GBP_1_23, GBP_2_33, GBP_2_36);
-                    Money test = Money.total(GBP, iterable);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 592);
-                }
+        return [
+            ["GBP 2.43", Currency::of('GBP'), 243],
+            ["GBP +12.57", Currency::of('GBP'), 1257],
+            ["GBP -5.87", Currency::of('GBP'), -587],
+            ["GBP 0.99", Currency::of('GBP'), 99],
+            // TODO ["GBP .99", Currency::of('GBP'), 99],
+            //["GBP +.99", Currency::of('GBP'), 99],
+            ["GBP +0.99", Currency::of('GBP'), 99],
+            //["GBP -.99", Currency::of('GBP'), -99],
+            ["GBP -0.99", Currency::of('GBP'), -99],
+            ["GBP 0", Currency::of('GBP'), 0],
+            ["GBP 2", Currency::of('GBP'), 200],
+            //["GBP 123.", Currency::of('GBP'), 12300],
+            ["GBP3", Currency::of('GBP'), 300],
+            ["GBP3.10", Currency::of('GBP'), 310],
+            ["GBP  3.10", Currency::of('GBP'), 310],
+            ["GBP   3.10", Currency::of('GBP'), 310],
+            ["GBP                           3.10", Currency::of('GBP'), 310],
+        ];
+    }
 
-                public void test_factory_total_CurrencyUnitIterable_empty() {
-            Iterable<Money> iterable = Collections.emptyList();
-                    Money test = Money.total(GBP, iterable);
-                    assertEquals(test.getCurrencyUnit(), GBP);
-                    assertEquals(test.getAmountMinorInt(), 0);
-                }
 
-                @Test(expectedExceptions = CurrencyMismatchException.class)
-                public void test_factory_total_CurrencyUnitIterable_currenciesDiffer() {
-                    try {
-                        Iterable<Money> iterable = Arrays.asList(JPY_423);
-                        Money.total(GBP, iterable);
-                    } catch (CurrencyMismatchException ex) {
-                assertEquals(ex.getFirstCurrency(), GBP);
-                assertEquals(ex.getSecondCurrency(), JPY);
-                throw ex;
-            }
-                }
+    /**
+     * @param $str
+     * @param Currency $currency
+     * @param $amount
+     * @dataProvider parseProvider
+     */
+    public function test_factory_parse($str, Currency $currency, $amount)
+    {
+        $test = Money::parse($str);
+        $this->assertEquals($test->getCurrency(), $currency);
+        $this->assertEquals($test->getAmountMinorInt(), $amount);
+    }
 
-                @Test(expectedExceptions = CurrencyMismatchException.class)
-                public void test_factory_total_CurrencyUnitIterable_currenciesDifferInIterable() {
-                    try {
-                        Iterable<Money> iterable = Arrays.asList(GBP_2_33, JPY_423);
-                        Money.total(GBP, iterable);
-                    } catch (CurrencyMismatchException ex) {
-                assertEquals(ex.getFirstCurrency(), GBP);
-                assertEquals(ex.getSecondCurrency(), JPY);
-                throw ex;
-            }
-                }
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function test_factory_parse_String_tooShort()
+    {
+        Money::parse("GBP ");
+    }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_CurrencyUnitIterable_nullFirst() {
-            Iterable<Money> iterable = Arrays.asList(null, GBP_2_33, GBP_2_36);
-                    Money.total(GBP, iterable);
-                }
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function test_factory_parse_String_badCurrency()
+    {
+        Money::parse("GBX 2.34");
+    }
 
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_total_CurrencyUnitIterable_nullNotFirst() {
-            Iterable<Money> iterable = Arrays.asList(GBP_2_33, null, GBP_2_36);
-                    Money.total(GBP, iterable);
-                }
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function test_factory_parse_String_nullString()
+    {
+        Money::parse(null);
+    }
 
-                //-----------------------------------------------------------------------
-                // parse(String)
-                //-----------------------------------------------------------------------
-                @DataProvider(name = "parse")
-                Object[][] data_parse() {
-                    return new Object[][] {
-                {"GBP 2.43", GBP, 243},
-                {"GBP +12.57", GBP, 1257},
-                {"GBP -5.87", GBP, -587},
-                {"GBP 0.99", GBP, 99},
-                {"GBP .99", GBP, 99},
-                {"GBP +.99", GBP, 99},
-                {"GBP +0.99", GBP, 99},
-                {"GBP -.99", GBP, -99},
-                {"GBP -0.99", GBP, -99},
-                {"GBP 0", GBP, 0},
-                {"GBP 2", GBP, 200},
-                {"GBP 123.", GBP, 12300},
-                {"GBP3", GBP, 300},
-                {"GBP3.10", GBP, 310},
-                {"GBP  3.10", GBP, 310},
-                {"GBP   3.10", GBP, 310},
-                {"GBP                           3.10", GBP, 310},
-            };
-                }
-
-                @Test(dataProvider = "parse")
-                public void test_factory_parse(String str, CurrencyUnit currency, int amount) {
-                Money test = Money.parse(str);
-                    assertEquals(test.getCurrencyUnit(), currency);
-                    assertEquals(test.getAmountMinorInt(), amount);
-                }
-
-                @Test(expectedExceptions = IllegalArgumentException.class)
-                public void test_factory_parse_String_tooShort() {
-            Money.parse("GBP ");
-                }
-
-                @Test(expectedExceptions = IllegalArgumentException.class)
-                public void test_factory_parse_String_badCurrency() {
-            Money.parse("GBX 2.34");
-                }
-
-                @Test(expectedExceptions = NullPointerException.class)
-                public void test_factory_parse_String_nullString() {
-            Money.parse((String) null);
-                }
-
+    /*
                 //-----------------------------------------------------------------------
                 // nonNull(Money,CurrencyUnit)
                 //-----------------------------------------------------------------------
@@ -716,63 +689,40 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
                 public void test_nonNull_MoneyCurrencyUnit_null_nullCurrency() {
             Money.nonNull(null, null);
                 }
+*/
 
-                //-----------------------------------------------------------------------
-                // serialization
-                //-----------------------------------------------------------------------
-                public void test_serialization() throws Exception {
-                Money a = GBP_2_34;
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ObjectOutputStream oos = new ObjectOutputStream(baos);
-                    oos.writeObject(a);
-                    oos.close();
-                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-                    Money input = (Money) ois.readObject();
-                    assertEquals(input, a);
-                }
+    /*
+     * serialize()
+     */
+    public function test_serialization()
+    {
+        $a = self::$GBP_2_34;
+        $serialized = serialize($a);
 
-                @Test(expectedExceptions = InvalidObjectException.class)
-                public void test_serialization_invalidNumericCode() throws Exception {
-                CurrencyUnit cu = new CurrencyUnit("GBP", (short) 234, (short) 2);
-                    Money m = Money.of(cu, 123.43d);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ObjectOutputStream oos = new ObjectOutputStream(baos);
-                    oos.writeObject(m);
-                    oos.close();
-                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-                    ois.readObject();
-                }
+        $this->assertEquals($a, unserialize($serialized));
+    }
 
-                @Test(expectedExceptions = InvalidObjectException.class)
-                public void test_serialization_invalidDecimalPlaces() throws Exception {
-                CurrencyUnit cu = new CurrencyUnit("GBP", (short) 826, (short) 3);
-                    Money m = Money.of(cu, 123.43d);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    ObjectOutputStream oos = new ObjectOutputStream(baos);
-                    oos.writeObject(m);
-                    oos.close();
-                    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-                    ois.readObject();
-                }*/
-
-    public function test_getCurrencyUnit_GBP()
+    /*
+     * getCurrency()
+     */
+    public function test_getCurrency_GBP()
     {
         $this->assertEquals(self::$GBP_2_34->getCurrency(), self::$GBP);
     }
 
-    public function test_getCurrencyUnit_EUR()
+    public function test_getCurrency_EUR()
     {
         $this->assertEquals(Money::parse("EUR -5.78")->getCurrency(), self::$EUR);
     }
 
 
-    public function test_withCurrencyUnit_Currency()
+    public function test_withCurrency_Currency()
     {
         $test = self::$GBP_2_34->withCurrency(self::$USD);
         $this->assertEquals($test->__toString(), "USD 2.34");
     }
 
-    public function test_withCurrencyUnit_Currency_same()
+    public function test_withCurrency_Currency_same()
     {
         $test = self::$GBP_2_34->withCurrency(self::$GBP);
         $this->assertSame($test, self::$GBP_2_34);
@@ -781,24 +731,24 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Brick\Math\Exception\RoundingNecessaryException
      */
-    public function test_withCurrencyUnit_Currency_scaleProblem()
+    public function test_withCurrency_Currency_scaleProblem()
     {
         self::$GBP_2_34->withCurrency(self::$JPY);
     }
 
-    public function test_withCurrencyUnit_CurrencyRoundingMode_DOWN()
+    public function test_withCurrency_CurrencyRoundingMode_DOWN()
     {
         $test = self::$GBP_2_34->withCurrency(self::$JPY, RoundingMode::DOWN);
         $this->assertEquals($test->__toString(), "JPY 2");
     }
 
-    public function test_withCurrencyUnit_CurrencyRoundingMode_UP()
+    public function test_withCurrency_CurrencyRoundingMode_UP()
     {
         $test = self::$GBP_2_34->withCurrency(self::$JPY, RoundingMode::UP);
         $this->assertEquals($test->__toString(), "JPY 3");
     }
 
-    public function test_withCurrencyUnit_CurrencyRoundingMode_same()
+    public function test_withCurrency_CurrencyRoundingMode_same()
     {
         $test = self::$GBP_2_34->withCurrency(self::$GBP, RoundingMode::DOWN);
         $this->assertSame($test, self::$GBP_2_34);
@@ -807,10 +757,14 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Brick\Math\Exception\RoundingNecessaryException
      */
-    public function test_withCurrencyUnit_CurrencyRoundingMode_UNECESSARY()
+    public function test_withCurrency_CurrencyRoundingMode_UNECESSARY()
     {
         self::$GBP_2_34->withCurrency(self::$JPY, RoundingMode::UNNECESSARY);
     }
+
+    /*
+     * getScale()
+     */
 
     public function test_getScale_GBP()
     {
@@ -2084,32 +2038,28 @@ class MoneyTest extends \PHPUnit_Framework_TestCase
     }
 
     /*
-                                            //-----------------------------------------------------------------------
-                                            // equals() hashCode()
-                                            //-----------------------------------------------------------------------
-                                            public void test_equals_hashCode_positive() {
-                                        Money a = GBP_2_34;
-                                                Money b = GBP_2_34;
-                                                Money c = GBP_2_35;
-                                                assertEquals(a.equals(a), true);
-                                                assertEquals(b.equals(b), true);
-                                                assertEquals(c.equals(c), true);
+     * equals()
+     */
+    public function test_equals_hashCode_positive()
+    {
+        $a = self::$GBP_2_34;
+        $b = self::$GBP_2_34;
+        $c = self::$GBP_2_35;
+        $this->assertTrue($a->equals($a));
+        $this->assertTrue($b->equals($b));
+        $this->assertTrue($c->equals($c));
+        $this->assertTrue($a->equals($b));
+        $this->assertTrue($b->equals($a));
+        $this->assertFalse($a->equals($c));
+        $this->assertFalse($b->equals($c));
+    }
 
-                                                assertEquals(a.equals(b), true);
-                                                assertEquals(b.equals(a), true);
-                                                assertEquals(a.hashCode() == b.hashCode(), true);
-
-                                                assertEquals(a.equals(c), false);
-                                                assertEquals(b.equals(c), false);
-                                            }
-
-                                            public void test_equals_false() {
-                                        Money a = GBP_2_34;
-                                                assertEquals(a.equals(null), false);
-                                                assertEquals(a.equals("String"), false);
-                                                assertEquals(a.equals(new Object()), false);
-                                            }*/
-
+    public function test_equals_false()
+    {
+        $a = self::$GBP_2_34;
+        $this->assertFalse($a->equals(null));
+        $this->assertFalse($a->equals("String"));
+    }
 
     public function test_toString_positive()
     {

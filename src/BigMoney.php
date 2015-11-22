@@ -66,6 +66,10 @@ final class BigMoney implements BigMoneyProviderInterface, \Serializable
         $currStr = substr($moneyStr, 0, 3);
         $amountStr = trim(substr($moneyStr, 3));
 
+        if (0 === strlen($amountStr)) {
+            throw new \InvalidArgumentException("Money amount '".$moneyStr."' cannot be parsed");
+        }
+
         if (!preg_match(self::PARSE_REGEX, $amountStr, $matches)) {
             throw new \InvalidArgumentException("Money amount '".$moneyStr."' cannot be parsed");
         }
@@ -916,6 +920,35 @@ final class BigMoney implements BigMoneyProviderInterface, \Serializable
     }
 
     /**
+     * Obtains an instance of {@code BigMoney} as the total value of an array.
+     * <p>
+     * The array must contain at least one monetary value.
+     * Subsequent amounts are added as though using {@link #plus(BigMoneyProvider)}.
+     * All amounts must be in the same currency.
+     *
+     * @param BigMoneyProviderInterface $monies the monetary values to total, not empty, no null elements, not null
+     * @return BigMoney the total, never null
+     * @throws \InvalidArgumentException if the array is empty
+     * @throws CurrencyMismatchException if the currencies differ
+     */
+    public static function total(BigMoneyProviderInterface...$monies)
+    {
+        Utils::checkNotNull($monies, "Money array must not be null");
+
+        if (0 === count($monies)) {
+            throw new \InvalidArgumentException("Money array must not be empty");
+        }
+
+        $total = self::ofProvider($monies[0]);
+
+        for ($i = 1; $i < count($monies); $i++) {
+            $total = $total->plus(self::ofProvider($monies[$i]));
+        }
+
+        return $total;
+    }
+
+    /**
      * @inheritdoc
      */
     public function toBigMoney()
@@ -934,6 +967,9 @@ final class BigMoney implements BigMoneyProviderInterface, \Serializable
         return Money::of($this->currency, $this->amount, $roundingMode);
     }
 
+    /**
+     * @inheritdoc
+     */
     public function __toString()
     {
         return sprintf("%s %s", $this->currency->getCode(), $this->amount);
@@ -998,4 +1034,31 @@ final class BigMoney implements BigMoneyProviderInterface, \Serializable
 
         return $this->amount->compareTo($otherMoney->amount);
     }
+
+    /**
+     * Checks if this monetary value equals another.
+     * <p>
+     * Like BigDecimal, this method compares the scale of the amount.
+     * Thus, 'USD 30.00' and 'USD 30' are not equal.
+     * <p>
+     * The compared values must be in the same currency.
+     *
+     * @param mixed $other the other object, null returns false
+     * @return bool true if this instance equals the other instance
+     */
+
+    public function equals($other)
+    {
+        if ($this === $other) {
+            return true;
+        }
+
+        if ($other instanceof BigMoney) {
+            return $this->currency == $other->getCurrency() &&
+            $this->amount->isEqualTo($other->amount);
+        }
+
+        return false;
+    }
+
 }

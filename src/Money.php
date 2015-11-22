@@ -11,7 +11,7 @@ namespace SmartGecko\Money;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 
-final class Money implements BigMoneyProviderInterface
+final class Money implements BigMoneyProviderInterface, \Serializable
 {
 
     /**
@@ -56,6 +56,35 @@ final class Money implements BigMoneyProviderInterface
         $amount = BigDecimal::of($amount)->toScale($currency->getDecimalPlaces(), $roundingMode);
 
         return new Money(BigMoney::of($currency, $amount));
+    }
+
+    /**
+     * Obtains an instance of {@code Money} as the total value of an array.
+     * <p>
+     * The array must contain at least one monetary value.
+     * Subsequent amounts are added as though using {@link #plus(Money)}.
+     * All amounts must be in the same currency.
+     *
+     * @param Money $monies the monetary values to total, not empty, no null elements, not null
+     * @return Money the total, never null
+     * @throws \InvalidArgumentException if the array is empty
+     * @throws CurrencyMismatchException if the currencies differ
+     */
+    public static function total(Money...$monies)
+    {
+        Utils::checkNotNull($monies, "Money array must not be null");
+
+        if (0 === count($monies)) {
+            throw new \InvalidArgumentException("Money array must not be empty");
+        }
+
+        $total = $monies[0];
+
+        for ($i = 1; $i < count($monies); $i++) {
+            $total = $total->plus($monies[$i]);
+        }
+
+        return $total;
     }
 
     /**
@@ -673,5 +702,27 @@ final class Money implements BigMoneyProviderInterface
     public function unserialize($serialized)
     {
         $this->money = unserialize($serialized);
+    }
+
+    /**
+     * Checks if this monetary value equals another.
+     * <p>
+     * The comparison takes into account the scale.
+     * The compared values must be in the same currency.
+     *
+     * @param mixed $other the other object to compare to, not null
+     * @return bool true if this instance equals the other instance
+     */
+    public function equals($other)
+    {
+        if ($this === $other) {
+            return true;
+        }
+
+        if ($other instanceof Money) {
+            return $this->money->equals($other->money);
+        }
+
+        return false;
     }
 }
